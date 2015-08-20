@@ -1,0 +1,10 @@
+source 'https://rubygems.org'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 4.1.4'
+
+# Use sqlite3 as the database for Active Record
+gem 'sqlite3'
+
+gem 'union_station_hooks_core', :path => 'ush_core'
+gem 'union_station_hooks_rails', :path => 'ush_rails'

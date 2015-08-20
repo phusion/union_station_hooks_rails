@@ -21,23 +21,43 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-PASSENGER_DIR = ENV['PASSENGER_DIR'] || abort("Please set the PASSENGER_DIR environment variable to the Passenger source directory")
-require("#{PASSENGER_DIR}/src/ruby_supportlib/phusion_passenger")
-PhusionPassenger.locate_directories
-PhusionPassenger.require_passenger_lib "constants"
-
 ROOT = File.expand_path(File.dirname(File.dirname(__FILE__)))
-require("#{ROOT}/lib/union_station_hooks")
-UnionStationHooks.require_lib "spec_helper"
 
-require "timecop"
+ush_core_path = ENV['USH_CORE_PATH']
+if ush_core_path
+  require "#{ush_core_path}/lib/union_station_hooks_core"
+else
+  require 'union_station_hooks_core'
+end
 
-DEBUG = !ENV['DEBUG'].to_s.empty?
-if DEBUG
-  UnionStationHooks.require_lib "log"
-  UnionStationHooks::Log.debugging = true
+UnionStationHooks.require_lib 'spec_helper'
+UnionStationHooks.require_lib 'utils'
+UnionStationHooks::SpecHelper.initialize!
+
+require("#{ROOT}/lib/union_station_hooks_rails")
+require 'json'
+
+module SpecHelper
+  def base64(data)
+    UnionStationHooks::Utils.base64(data)
+  end
+
+  def get_json(path)
+    JSON.parse(get(path))
+  end
+
+  def post_and_get_response(path, form)
+    uri = URI.parse("#{root_url}#{path}")
+    Net::HTTP.post_form(uri, form)
+  end
+
+  def post(path, form)
+    response = post_and_get_response(path, form)
+    return_200_response_body(path, response)
+  end
 end
 
 RSpec.configure do |config|
   config.include(UnionStationHooks::SpecHelper)
+  config.include(SpecHelper)
 end

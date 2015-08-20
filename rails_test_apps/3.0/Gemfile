@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+
+gem 'rails', '~> 3.0.0'
+gem 'sqlite3'
+
+gem 'union_station_hooks_core', :path => 'ush_core'
+gem 'union_station_hooks_rails', :path => 'ush_rails'
