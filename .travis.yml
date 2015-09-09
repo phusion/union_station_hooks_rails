@@ -1,0 +1,10 @@
+language: ruby
+install:
+  - bundle install --jobs=3 --retry=3 --deployment --without notravis --path vendor/bundle
+  - bundle exec rake install_test_app_bundles BUNDLE_ARGS="--jobs=3 --retry=3 --deployment --path $PWD/vendor/bundle"
+cache:
+  directories:
+    - vendor/bundle
+    - passenger
+script: bundle exec rake spec:travis GEM_BUNDLE_PATH="$PWD/vendor/bundle"
+sudo: false

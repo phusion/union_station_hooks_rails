@@ -45,8 +45,6 @@ Dir["#{ROOT}/rails_test_apps/*"].each do |rails_app_dir|
         "#{@app_dir}/ush_rails")
       FileUtils.cp_r(Dir["#{rails_app_dir}/*"],
         @app_dir)
-      FileUtils.cp_r("#{rails_app_dir}/.bundle",
-        @app_dir)
       if @create_initializer
         write_file("#{@app_dir}/config/initializers/union_station.rb", %Q{
           if defined?(UnionStationHooks)
@@ -55,6 +53,32 @@ Dir["#{ROOT}/rails_test_apps/*"].each do |rails_app_dir|
           end
         })
       end
+      update_versions_in_gemfile
+      create_bundle_config
+    end
+
+    def update_versions_in_gemfile
+      gemfile_lock = "#{@app_dir}/Gemfile.lock"
+      content = File.open(gemfile_lock, 'r') { |f| f.read }
+      content.gsub!(/union_station_hooks_core \(.+\)/,
+        "union_station_hooks_core (#{UnionStationHooks::VERSION_STRING})")
+      content.gsub!(/union_station_hooks_rails \(.+\)/,
+        'union_station_hooks_rails ' \
+        "(#{UnionStationHooksRails::VERSION_STRING})")
+      write_file(gemfile_lock, content)
+    end
+
+    def create_bundle_config
+      path = "#{@app_dir}/.bundle/config"
+      content =
+        "---\n" \
+        "BUNDLE_WITHOUT: development:doc\n"
+      if ENV['GEM_BUNDLE_PATH']
+        content << "BUNDLE_PATH: "
+        content << ENV['GEM_BUNDLE_PATH']
+        content << "\n"
+      end
+      write_file(path, content)
     end
 
     def start_app

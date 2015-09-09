@@ -1,7 +1,7 @@
 PATH
   remote: ush_core
   specs:
-    union_station_hooks_core (1.2.0)
+    union_station_hooks_core (1.0.1)
 
 PATH
   remote: ush_rails

@@ -21,6 +21,8 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
+TRAVIS_PASSENGER_BRANCH = 'ust_router_rewrite'
+
 if defined?(Bundler)
   # Undo Bundler environment so that calls to 'bundle install' won't try to
   # access the .bundle directory in the gem's toplevel directory.
@@ -52,13 +54,29 @@ task :install_test_app_bundles do
   bundle_args = ENV['BUNDLE_ARGS']
   Dir['rails_test_apps/*'].each do |dir|
     next if !should_run_rails_test?(dir)
+    puts "Installing gem bundle for Rails #{File.basename(dir)}"
+    sh "mkdir -p tmp.bundler"
     begin
-      sh "cd #{dir} && " \
+      sh "cp #{dir}/Gemfile #{dir}/Gemfile.lock tmp.bundler/"
+
+      puts "Editing tmp.bundler/Gemfile.lock"
+      content = File.open("tmp.bundler/Gemfile.lock", "r") do |f|
+        f.read
+      end
+      content.gsub!(/union_station_hooks_core \(.+\)/,
+        "union_station_hooks_core (#{UnionStationHooks::VERSION_STRING})")
+      content.gsub!(/union_station_hooks_rails \(.+\)/,
+        "union_station_hooks_rails (#{UnionStationHooksRails::VERSION_STRING})")
+      File.open("tmp.bundler/Gemfile.lock", "w") do |f|
+        f.write(content)
+      end
+
+      sh "cd tmp.bundler && " \
         "ln -s #{Shellwords.escape UnionStationHooks::ROOT} ush_core && " \
         "ln -s #{Shellwords.escape UnionStationHooksRails::ROOT} ush_rails && " \
         "bundle install --without development doc #{bundle_args}"
     ensure
-      sh "cd #{dir} && rm -f ush_core ush_rails"
+      sh "rm -rf tmp.bundler"
     end
   end
 end
@@ -72,6 +90,40 @@ task :spec do
 end
 
 task :test => :spec
+
+desc 'Run tests in Travis'
+task "spec:travis" do
+  if !File.exist?('passenger/.git')
+    sh "git clone --recursive --branch #{TRAVIS_PASSENGER_BRANCH} git://github.com/phusion/passenger.git"
+  else
+    puts 'cd passenger'
+    Dir.chdir('passenger') do
+      sh 'git fetch'
+      sh 'rake clean'
+      sh "git reset --hard origin/#{TRAVIS_PASSENGER_BRANCH}"
+      sh 'git submodule update --init --recursive'
+    end
+    puts 'cd ..'
+  end
+
+  passenger_config = "#{Dir.pwd}/passenger/bin/passenger-config"
+  envs = {
+    'PASSENGER_CONFIG' => passenger_config,
+    'CC' => 'ccache cc',
+    'CXX' => 'ccache c++',
+    'CCACHE_COMPRESS' => '1',
+    'CCACHE_COMPRESS_LEVEL' => '3',
+    'CCACHE_DIR' => "#{Dir.pwd}/passenger/.ccache"
+  }
+  envs.each_pair do |key, val|
+    ENV[key] = val
+    puts "$ export #{key}='#{val}'"
+  end
+  sh 'mkdir -p passenger/.ccache'
+  sh "#{passenger_config} install-agent --auto"
+
+  Rake::Task['spec'].invoke
+end
 
 desc 'Build gem'
 task :gem do

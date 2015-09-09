@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.files = Dir[
     "README.md",
     "LICENSE.md",
+    "*.gemspec",
     "lib/**/*"
   ]
   s.homepage = "https://github.com/phusion/union_station_hooks_rails"
