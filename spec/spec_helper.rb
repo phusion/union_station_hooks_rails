@@ -29,6 +29,8 @@ if ush_core_path
 else
   require 'union_station_hooks_core'
 end
+puts 'Using union_station_hooks_core installation at: ' \
+  "#{UnionStationHooks::ROOT}"
 
 UnionStationHooks.require_lib 'spec_helper'
 UnionStationHooks.require_lib 'utils'
