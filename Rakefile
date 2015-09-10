@@ -93,6 +93,19 @@ task :test => :spec
 
 desc 'Run tests in Travis'
 task "spec:travis" do
+  if !ENV['PASSENGER_CONFIG']
+    Rake::Task['travis:install_passenger'].invoke
+  end
+  Rake::Task['spec'].invoke
+end
+
+desc 'Build gem'
+task :gem do
+  sh 'gem build union_station_hooks_rails.gemspec'
+end
+
+
+task 'travis:install_passenger' do
   if !File.exist?('passenger/.git')
     sh "git clone --recursive --branch #{TRAVIS_PASSENGER_BRANCH} git://github.com/phusion/passenger.git"
   else
@@ -121,13 +134,6 @@ task "spec:travis" do
   end
   sh 'mkdir -p passenger/.ccache'
   sh "#{passenger_config} install-agent --auto"
-
-  Rake::Task['spec'].invoke
-end
-
-desc 'Build gem'
-task :gem do
-  sh 'gem build union_station_hooks_rails.gemspec'
 end
 
 
