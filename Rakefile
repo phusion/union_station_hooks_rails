@@ -105,35 +105,52 @@ task :gem do
 end
 
 
-task 'travis:install_passenger' do
-  if !File.exist?('passenger/.git')
-    sh "git clone --recursive --branch #{TRAVIS_PASSENGER_BRANCH} git://github.com/phusion/passenger.git"
-  else
-    puts 'cd passenger'
-    Dir.chdir('passenger') do
-      sh 'git fetch'
-      sh 'rake clean'
-      sh "git reset --hard origin/#{TRAVIS_PASSENGER_BRANCH}"
-      sh 'git submodule update --init --recursive'
+namespace :travis do
+  task :install_passenger do
+    if File.exist?('../../../../../bin/passenger-config')
+      # We are vendored into Passenger
+      Rake::Task['travis:install_passenger_vendor'].invoke
+    else
+      Rake::Task['travis:install_passenger_git'].invoke
     end
-    puts 'cd ..'
   end
 
-  passenger_config = "#{Dir.pwd}/passenger/bin/passenger-config"
-  envs = {
-    'PASSENGER_CONFIG' => passenger_config,
-    'CC' => 'ccache cc',
-    'CXX' => 'ccache c++',
-    'CCACHE_COMPRESS' => '1',
-    'CCACHE_COMPRESS_LEVEL' => '3',
-    'CCACHE_DIR' => "#{Dir.pwd}/passenger/.ccache"
-  }
-  envs.each_pair do |key, val|
-    ENV[key] = val
-    puts "$ export #{key}='#{val}'"
+  task :install_passenger_vendor do
+    passenger_config = File.expand_path('../../../../../bin/passenger-config')
+    ENV['PASSENGER_CONFIG'] = passenger_config
+    sh "#{passenger_config} install-standalone-runtime --auto"
   end
-  sh 'mkdir -p passenger/.ccache'
-  sh "#{passenger_config} install-agent --auto"
+
+  task :install_passenger_git do
+    if !File.exist?('passenger/.git')
+      sh "git clone --recursive --branch #{TRAVIS_PASSENGER_BRANCH} git://github.com/phusion/passenger.git"
+    else
+      puts 'cd passenger'
+      Dir.chdir('passenger') do
+        sh 'git fetch'
+        sh 'rake clean'
+        sh "git reset --hard origin/#{TRAVIS_PASSENGER_BRANCH}"
+        sh 'git submodule update --init --recursive'
+      end
+      puts 'cd ..'
+    end
+
+    passenger_config = "#{Dir.pwd}/passenger/bin/passenger-config"
+    envs = {
+      'PASSENGER_CONFIG' => passenger_config,
+      'CC' => 'ccache cc',
+      'CXX' => 'ccache c++',
+      'CCACHE_COMPRESS' => '1',
+      'CCACHE_COMPRESS_LEVEL' => '3',
+      'CCACHE_DIR' => "#{Dir.pwd}/passenger/.ccache"
+    }
+    envs.each_pair do |key, val|
+      ENV[key] = val
+      puts "$ export #{key}='#{val}'"
+    end
+    sh 'mkdir -p passenger/.ccache'
+    sh "#{passenger_config} install-standalone-runtime --auto"
+  end
 end
 
 
