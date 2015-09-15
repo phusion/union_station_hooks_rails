@@ -31,7 +31,7 @@ module UnionStationHooksRails
       UnionStationHooks.call_event_pre_hook(event)
       reporter.log_database_query(
         :begin_time => event.time,
-        :end_time => event.time,
+        :end_time => UnionStationHooks.now,
         :query => event.payload[:sql]
       )
     end
