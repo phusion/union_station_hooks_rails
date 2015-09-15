@@ -30,6 +30,7 @@ GEM
       rainbow (>= 1.99.1, < 3.0)
       ruby-progressbar (~> 1.4)
     ruby-progressbar (1.7.5)
+    union_station_hooks_core (2.0.0)
 
 PLATFORMS
   ruby
