@@ -1,5 +1,5 @@
 #  Union Station - https://www.unionstationapp.com/
-#  Copyright (c) 2010-2015 Phusion Holding B.V.
+#  Copyright (c) 2015 Phusion Holding B.V.
 #
 #  "Union Station" and "Passenger" are trademarks of Phusion Holding B.V.
 #
@@ -21,25 +21,34 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-
 module UnionStationHooksRails
-  module ActionControllerExtension
-    def process_action(action, *args)
-      reporter = request.env['union_station_hooks']
-      return super if !reporter
+  class ActionViewSubscriber < ActiveSupport::LogSubscriber
+    def render_collection(event)
+      log_view_rendering(event)
+    end
 
-      options = {
-        :controller_name => self.class.name,
-        :action_name => action_name,
-        :method => request.request_method
-      }
-      reporter.log_controller_action_block(options) do
-        super
-      end
+    def render_template(event)
+      log_view_rendering(event)
+    end
+
+    def render_partial(event)
+      log_view_rendering(event)
+    end
+
+  private
+
+    def log_view_rendering(event)
+      reporter = Thread.current[:union_station_hooks]
+      return if !reporter
+
+      UnionStationHooks.call_event_pre_hook(event)
+      reporter.log_view_rendering(
+        :begin_time => event.time,
+        :end_time => UnionStationHooks.now,
+        :name => event.payload[:identifier]
+      )
     end
   end
 end
 
-ActionController::Base.class_eval do
-  include UnionStationHooksRails::ActionControllerExtension
-end
+UnionStationHooksRails::ActionViewSubscriber.attach_to(:action_view)

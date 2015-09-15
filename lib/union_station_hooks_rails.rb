@@ -92,6 +92,9 @@ module UnionStationHooksRails
       require_lib('initialize')
       require_lib('active_record_subscriber')
       require_lib('exception_logger')
+      if defined?(ActionView)
+        require_lib('action_view_subscriber')
+      end
       if defined?(ActiveSupport::Cache::Store)
         require_lib('active_support_cache_subscriber')
       end
