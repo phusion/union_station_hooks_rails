@@ -156,12 +156,12 @@ module UnionStationHooksRails
 
       # If you update the dependency version here, also update
       # the version in the gemspec and in the Gemfile.
-      compatible = UnionStationHooks::MAJOR_VERSION == 1 &&
+      compatible = UnionStationHooks::MAJOR_VERSION == 2 &&
         UnionStationHooks::MINOR_VERSION >= 0
       if !compatible
         raise "This version of the union_station_hooks_rails gem " \
           "(#{VERSION_STRING}) is only compatible with the " \
-          "union_station_hooks_core gem 1.x.x. However, you have loaded " \
+          "union_station_hooks_core gem 2.x.x. However, you have loaded " \
           "union_station_hooks_core #{UnionStationHooks::VERSION_STRING}"
       end
     end

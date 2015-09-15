@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   # If you update the dependency version here, also update
   # the version in Gemfile and union_station_hooks_rails.rb method
   # `require_and_check_union_station_hooks_core`
-  s.add_dependency("union_station_hooks_core", "~> 1.0")
+  s.add_dependency("union_station_hooks_core", "~> 2.0")
 
   s.add_dependency("activesupport", ">= 3.0")
   s.add_dependency("activemodel", ">= 3.0")
