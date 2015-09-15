@@ -45,7 +45,8 @@ module UnionStationHooksRails
       reporter.log_view_rendering(
         :begin_time => event.time,
         :end_time => UnionStationHooks.now,
-        :name => event.payload[:identifier]
+        :name => event.payload[:identifier],
+        :has_error => event.payload[:exception]
       )
     end
   end

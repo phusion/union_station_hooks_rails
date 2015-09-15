@@ -21,15 +21,15 @@ shared_examples_for 'ActiveRecord hooks' do
     wait_for_dump_file_existance
     eventually do
       log = read_dump_file
-      log =~ /BEGIN: DB BENCHMARK: .* \(.*\) .+$/ &&
-        log =~ /END: DB BENCHMARK: .* \(.*\)$/
+      log =~ /BEGIN: database query 2 \(.*\) .+$/ &&
+        log =~ /END: database query 2 \(.*\)$/
     end
 
-    db_lines = read_dump_file.scan(/BEGIN: DB BENCHMARK: .* \(.*\) .+$/)
+    db_lines = read_dump_file.scan(/BEGIN: database query \d+ \(.*\) .+$/)
     expect(db_lines.size).to eq(2)
 
     db_info = db_lines.map do |line|
-      line =~ /BEGIN: DB BENCHMARK: .* \(.*\) (.+)$/
+      line =~ /BEGIN: database query \d+ \(.*\) (.+)$/
       Base64.decode64($1)
     end
 

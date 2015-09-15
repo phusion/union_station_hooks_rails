@@ -130,8 +130,8 @@ shared_examples_for 'ActionController hooks' do
     wait_for_dump_file_existance
     eventually do
       log = read_dump_file
-      log.include?('BEGIN: view rendering') &&
-        log.include?('END: view rendering')
+      log.include?('BEGIN: view rendering 1') &&
+        log.include?('END: view rendering 1')
     end
   end
 
@@ -153,8 +153,8 @@ shared_examples_for 'ActionController hooks' do
     wait_for_dump_file_existance
     eventually do
       log = read_dump_file
-      log.include?('BEGIN: view rendering') &&
-        log.include?('FAIL: view rendering')
+      log.include?('BEGIN: view rendering 1') &&
+        log.include?('FAIL: view rendering 1')
     end
   end
 end

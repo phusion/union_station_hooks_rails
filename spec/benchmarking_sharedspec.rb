@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fileutils'
+require 'base64'
 
 shared_examples_for 'Benchmarking hooks' do
   it 'logs ActionController benchmarks' do
@@ -25,9 +26,13 @@ shared_examples_for 'Benchmarking hooks' do
     wait_for_dump_file_existance
     eventually do
       log = read_dump_file
-      log.include?('BEGIN: BENCHMARK: hello') &&
-        log.include?('END: BENCHMARK: hello')
+      log.include?('BEGIN: user activity 1') &&
+        log.include?('END: user activity 1')
     end
+
+    read_dump_file =~ /user activity 1 \(.*\) (.+)$/
+    extra_info = Base64.decode64($1)
+    expect(extra_info).to eq('Benchmark: hello')
   end
 
   it "logs ActionView benchmarks" do
@@ -46,8 +51,12 @@ shared_examples_for 'Benchmarking hooks' do
     wait_for_dump_file_existance
     eventually do
       log = read_dump_file
-      log.include?('BEGIN: BENCHMARK: hello') &&
-        log.include?('END: BENCHMARK: hello')
+      log.include?('BEGIN: user activity 1') &&
+        log.include?('END: user activity 1')
     end
+
+    read_dump_file =~ /user activity 1 \(.*\) (.+)$/
+    extra_info = Base64.decode64($1)
+    expect(extra_info).to eq('Benchmark: hello')
   end
 end
