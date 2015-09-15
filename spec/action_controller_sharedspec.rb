@@ -1,4 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require 'base64'
 
 shared_examples_for 'ActionController hooks' do
   it 'logs the controller and action name' do
@@ -156,5 +157,32 @@ shared_examples_for 'ActionController hooks' do
       log.include?('BEGIN: view rendering 1') &&
         log.include?('FAIL: view rendering 1')
     end
+  end
+
+  it 'logs the name of the templates that are rendered' do
+    write_file("#{@app_dir}/app/controllers/home_controller.rb", %Q{
+      class HomeController < ActionController::Base
+        def index
+        end
+      end
+    })
+    write_file("#{@app_dir}/app/views/home/index.html.erb", %Q{
+      hello world
+    })
+
+    start_app
+
+    get('/home')
+
+    wait_for_dump_file_existance
+    eventually do
+      log = read_dump_file
+      log.include?('BEGIN: view rendering 1') &&
+        log.include?('END: view rendering 1')
+    end
+
+    read_dump_file =~ /view rendering 1 \(.*\) (.+)$/
+    extra_info = Base64.decode64($1)
+    expect(extra_info).to include('home/index')
   end
 end
