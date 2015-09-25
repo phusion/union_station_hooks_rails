@@ -21,7 +21,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-TRAVIS_PASSENGER_BRANCH = 'ust_router_rewrite'
+TRAVIS_PASSENGER_BRANCH = 'master'
 
 if defined?(Bundler)
   # Undo Bundler environment so that calls to 'bundle install' won't try to
