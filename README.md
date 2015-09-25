@@ -23,7 +23,7 @@
 
 ### Using with Passenger
 
-**Note: This documentation section only applies to Passenger X.X.X or later!**
+**Note: This documentation section only applies to Passenger 5.0.20 or later!**
 
 If you use [Passenger](https://www.phusionpassenger.com/), then you do not need to install the `union_station_hooks_rails` gem. `union_station_hooks_rails` is bundled with Passenger.
 
@@ -87,11 +87,11 @@ It is currently not possible to use Union Station without Passenger. If you woul
 
 ## Legacy code
 
-Before Passenger X.X.X, the Union Station setup instructions used to tell you to create a `config/initializers/passenger.rb` in which you call the following code:
+Before Passenger 5.0.20, the Union Station setup instructions used to tell you to create a `config/initializers/passenger.rb` in which you call the following code:
 
     PhusionPassenger.install_framework_extensions! if defined?(PhusionPassenger)
 
-Since Passenger X.X.X, `PhusionPassenger.install_framework_extensions!` has become an alias for `UnionStationHooks.initialize!`, but the former is considered deprecated. Please replace the above code with:
+Since Passenger 5.0.20, `PhusionPassenger.install_framework_extensions!` has become an alias for `UnionStationHooks.initialize!`, but the former is considered deprecated. Please replace the above code with:
 
     if defined?(UnionStationHooks)
       UnionStationHooks.initialize!
