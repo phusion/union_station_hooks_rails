@@ -1,4 +1,4 @@
-# Union Station Ruby hooks rails
+# Union Station Ruby on Rails hooks
 
 [![Build Status](https://travis-ci.org/phusion/union_station_hooks_rails.svg?branch=master)](https://travis-ci.org/phusion/union_station_hooks_rails)
 
