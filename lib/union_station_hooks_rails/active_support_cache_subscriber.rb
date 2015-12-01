@@ -55,14 +55,23 @@ module UnionStationHooksRails
   end
 end
 
-ActiveSupport::Cache::Store.instrument = true
+# Instrumentation is always on since 4.2. This method will be removed in Rails 5.
+if defined?(ActiveSupport::Cache::Store) &&
+   ActiveSupport::Cache::Store.respond_to?(:instrument=)
 
-if defined?(PhusionPassenger)
-  PhusionPassenger.on_event(:starting_request_handler_thread) do
-    if defined?(ActiveSupport::Cache::Store)
-      # This flag is thread-local, so re-initialize it for every
-      # request handler thread.
-      ActiveSupport::Cache::Store.instrument = true
+  ActiveSupport::Deprecation.silence do
+    ActiveSupport::Cache::Store.instrument = true
+  end
+
+  if defined?(PhusionPassenger)
+    PhusionPassenger.on_event(:starting_request_handler_thread) do
+      if defined?(ActiveSupport::Cache::Store)
+        ActiveSupport::Deprecation.silence do
+          # This flag is thread-local, so re-initialize it for every
+          # request handler thread.
+          ActiveSupport::Cache::Store.instrument = true
+        end
+      end
     end
   end
 end
