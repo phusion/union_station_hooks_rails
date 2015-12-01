@@ -89,20 +89,41 @@ module UnionStationHooksRails
       return false if !should_initialize?
       return true if initialized?
 
-      require_lib('initialize')
-      require_lib('active_record_subscriber')
-      require_lib('exception_logger')
-      if defined?(ActionView)
-        require_lib('action_view_subscriber')
-      end
-      if defined?(ActiveSupport::Cache::Store)
-        require_lib('active_support_cache_subscriber')
-      end
-      if defined?(ActionController::Base)
-        require_lib('action_controller_extension')
-      end
-      if defined?(ActiveSupport::Benchmarkable)
-        require_lib('active_support_benchmarkable_extension')
+      begin
+        require_lib('initialize')
+        require_lib('active_record_subscriber')
+        require_lib('exception_logger')
+        if defined?(ActionView)
+          require_lib('action_view_subscriber')
+        end
+        if defined?(ActiveSupport::Cache::Store)
+          require_lib('active_support_cache_subscriber')
+        end
+        if defined?(ActionController::Base)
+          require_lib('action_controller_extension')
+        end
+        if defined?(ActiveSupport::Benchmarkable)
+          require_lib('active_support_benchmarkable_extension')
+        end
+      rescue => e
+        if UnionStationHooks.config[:initialize_from_check]
+          # The union_station_hooks_core gem already reported the error
+          # to Union Station.
+          STDERR.puts(' *** WARNING: an error occurred while initializing ' \
+            'the Union Station Rails hooks. This is because you did not ' \
+            'initialize the Union Station hooks from an initializer file. ' \
+            'Please create an initializer file ' \
+            '`config/initializers/union_station.rb` in which you call ' \
+            "this:\n\n" \
+            "  if defined?(UnionStationHooks)\n" \
+            "    UnionStationHooks.initialize!\n" \
+            "  end\n\n" \
+            "The error is as follows:\n" \
+            "#{e} (#{e.class})\n    " +
+            e.backtrace.join("\n    "))
+        else
+          raise e
+        end
       end
 
       @@initialized = true
@@ -157,13 +178,19 @@ module UnionStationHooksRails
       # If you update the dependency version here, also update
       # the version in the gemspec and in the Gemfile.
       compatible = UnionStationHooks::MAJOR_VERSION == 2 &&
-        UnionStationHooks::MINOR_VERSION >= 0
+        ush_core_minor_and_tiny_version_compatible?
       if !compatible
         raise "This version of the union_station_hooks_rails gem " \
           "(#{VERSION_STRING}) is only compatible with the " \
-          "union_station_hooks_core gem 2.x.x. However, you have loaded " \
-          "union_station_hooks_core #{UnionStationHooks::VERSION_STRING}"
+          "union_station_hooks_core gem 2.x.x, starting from v2.0.3. " \
+          "However, you have loaded union_station_hooks_core #{UnionStationHooks::VERSION_STRING}"
       end
+    end
+
+    # @private
+    def ush_core_minor_and_tiny_version_compatible?
+      UnionStationHooks::MINOR_VERSION >= 1 ||
+        UnionStationHooks::TINY_VERSION >= 4
     end
   end
 end

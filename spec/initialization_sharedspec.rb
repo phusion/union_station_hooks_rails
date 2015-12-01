@@ -21,7 +21,7 @@ shared_examples_for 'Initialization' do
     )
   end
 
-  it 'raises an error if no initializer file exists' do
+  it 'raises no error if no initializer file exists' do
     write_file("#{@app_dir}/app/controllers/home_controller.rb", %Q{
       class HomeController < ApplicationController
         def index
@@ -34,9 +34,8 @@ shared_examples_for 'Initialization' do
     start_app
 
     response = get_response('/home')
-    expect(response.code).to eq('500')
-    expect(response.body).to include(
-      "The Union Station hooks are not initialized")
+    expect(response.code).to eq('200')
+    expect(response.body).to eq('ok')
   end
 
   it 'overrides the vendored Union Station hooks bundled with Passenger' do
